@@ -3,24 +3,34 @@ services:
   nginx:
     build: 
       context: .
-      dockerfile: ./nginx/Dockerfile
+      dockerfile: ./nginx/Dockerfile.nginx
     ports:
-      - "80:80" # Nginx는 80 포트에서 실행
-      - "443:443" # Nginx는 443 포트에서 HTTPS 실행
+      - "80:80"
+      - "443:443"
     env_file:
-      - nginx.env
+      - .env
     volumes:
-      - ./nginx/certbot/conf:/etc/letsencrypt # Certbot 인증서 저장
-      - ./nginx/certbot/www:/var/www/certbot # Certbot 인증 파일 저장
-        
+      - ./scripts/substitute_env.sh:/scripts/substitute_env.sh
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./scripts/autorenew.sh:/scripts/autorenew.sh
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; /scripts/autorenew.sh'"
+
   pocketbase:
     build:
       context: .
-      dockerfile: ./pb/Dockerfile
+      dockerfile: ./pb/Dockerfile.pb
     ports:
       - "8090:8090"
     env_file:
-      - pb.env
+      - .env
     volumes:
       - ./pb/pb_data:/data
       - ./pb/pb_public:/public
@@ -28,10 +38,8 @@ services:
   code-server:
     build:
       context: .
-      dockerfile: ./code-server/Dockerfile
+      dockerfile: ./vscode/Dockerfile.vscode
     ports:
       - "8080:8080"
     env_file:
-      - code-server.env
-    volumes:
-      - 
+      - .env
