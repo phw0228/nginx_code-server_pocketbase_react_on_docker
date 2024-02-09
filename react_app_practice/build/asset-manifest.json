@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/absproxy/3000/static/css/main.81ad03bc.css",
+    "main.js": "/absproxy/3000/static/js/main.22618fd8.js",
+    "index.html": "/absproxy/3000/index.html",
+    "main.81ad03bc.css.map": "/absproxy/3000/static/css/main.81ad03bc.css.map",
+    "main.22618fd8.js.map": "/absproxy/3000/static/js/main.22618fd8.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.81ad03bc.css",
+    "static/js/main.22618fd8.js"
+  ]
+}

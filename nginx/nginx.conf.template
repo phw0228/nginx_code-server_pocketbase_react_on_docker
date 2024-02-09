@@ -1,0 +1,41 @@
+events {
+    worker_connections 1024;
+}
+
+# HTTP와 HTTPS 트래픽을 처리하기 위한 설정
+http {
+    # 기타 http 설정...
+
+    # HTTP 서버 블록: 80 포트에서 HTTP 트래픽을 수신
+    # 사용자가 HTTP로 접속할 경우 HTTPS로 리다이렉트
+    server {
+        listen 80;
+        server_name ${DOMAIN};  # 도메인 설정
+
+        # 모든 HTTP 트래픽을 HTTPS로 리다이렉트
+        location / {
+            return 301 https://$host$request_uri;
+        }
+    }
+
+    # HTTPS 서버 블록: 443 포트에서 HTTPS 트래픽을 수신
+    server {
+        listen 443 ssl http2;  # SSL과 HTTP/2를 사용하여 HTTPS 트래픽 수신
+        server_name ${DOMAIN};  # 도메인 설정
+
+        # SSL 인증서 설정
+        ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;  # 인증서 파일
+        ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;  # 비밀 키 파일
+
+        # PocketBase로 트래픽 프록시 설정
+        location / {
+            proxy_pass http://pocketbase:8090;  # PocketBase 서비스로 프록시
+            proxy_set_header Host $host;  # 헤더 설정
+            proxy_set_header X-Real-IP $remote_addr;  # 클라이언트의 실 IP 전달
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;  # 프록시 체인에 있는 모든 클라이언트 IP 전달
+            proxy_set_header X-Forwarded-Proto $scheme;  # 사용된 프로토콜 (http, https)
+        }
+    }
+
+    # 기타 설정...
+}

@@ -1,0 +1,10 @@
+sudo systemctl restart nginx
+HOST=0.0.0.0 npm start
+sudo truncate -s 0 /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/access.log
+0b4f874ce87fb208a760f71f
+sudo lsof -i:3000
+sudo tail -n 10 /var/log/nginx/access.log
+yarn start
+sudo ln -f -s /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled/nginx.conf
+npm create vite@latest
