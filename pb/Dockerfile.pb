@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-WORKDIR /home/pocketbase
+WORKDIR /home/user/pocketbase
 
 RUN apk add --no-cache \
     unzip \
@@ -20,3 +20,5 @@ EXPOSE 8090
 
 # start PocketBase
 CMD ["./pb/pocketbase", "serve", "--http=0.0.0.0:8090"]
+
+USER user

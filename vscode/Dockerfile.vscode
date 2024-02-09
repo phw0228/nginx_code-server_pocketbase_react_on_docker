@@ -2,17 +2,15 @@
 FROM codercom/code-server:latest
 
 # 작업 디렉토리 설정
-WORKDIR /home/code-server
-# 프로젝트 의존성 파일 복사 및 설치
-# 예: Node.js 프로젝트인 경우 package.json 및 package-lock.json 복사 후 npm install 실행
-# COPY package*.json ./
-# RUN npm install
+WORKDIR /home/user/code-server
 
-# 프로젝트 파일 복사
-# COPY . .
-
-# code-server 설정 (선택 사항)
-# ENV PASSWORD="your_password" # code-server 접속 비밀번호 설정 (환경변수를 통해 제어 가능)
+RUN npm install
 
 # code-server 실행 시 사용할 기본 명령어 설정
-CMD ["code-server", "--auth", "none", "--bind-addr", "0.0.0.0:8080", "--disable-telemetry"]
+CMD ["code-server", "--auth", "password", \
+"--bind-addr", "0.0.0.0:8080", "--cert", \
+"/etc/letsencrypt/live/${DOMAIN}/fullchain.pem", \
+"--cert-key", "/etc/letsencrypt/live/${DOMAIN}/privkey.pem", \
+"--disable-telemetry"]
+
+USER user
