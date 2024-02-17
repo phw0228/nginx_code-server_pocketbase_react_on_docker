@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  nginx:
+    container_name: nginx
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+      args:
+        DOMAIN: ${DOMAIN}
+        EMAIL: ${EMAIL}
+        DOLLAR: ${DOLLAR}
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - .env
+    volumes:
+      - ./nginx/certbot/letsencrypt:/etc/letsencrypt
+      - ./nginx/certbot:/var/www/certbot
+
+  pocketbase:
+    container_name: pocketbase
+    build:
+      context: .
+      dockerfile: ./pocketbase/Dockerfile
+      args:
+        PB_VERSION: ${PB_VERSION}
+    depends_on:
+      - nginx
+    ports:
+      - "8090:8090"
+    env_file:
+      - .env
+    volumes:
+      - ./pocketbase/pb_data:/home/pocketbase/pb_data
+
+  code-server:
+    container_name: code-server
+    build:
+      context: .
+      dockerfile: ./code-server/Dockerfile
+      args:
+        CERT: ${CERT}
+        CERT_KEY: ${CERT_KEY}
+        password: ${PASSWORD}
+    depends_on:
+      - nginx
+    ports:
+      - "8080:8080"
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./react_app:/home/coder
+      - ./nginx/certbot/letsencrypt:/etc/letsencrypt
+      - ./code-server/config:/home/coder/.local/share/code-server

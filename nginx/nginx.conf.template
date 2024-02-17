@@ -1,0 +1,90 @@
+events {
+}
+
+http {
+    server {
+        listen 80;
+        server_name ${DOMAIN};
+
+        location / {
+            return 301 https://${DOLLAR}host${DOLLAR}request_uri;
+        }
+    }
+
+    server {
+        listen 443 ssl http2;
+        server_name ${DOMAIN};
+
+        ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+
+		location / {
+		    alias /home/ubuntu/react-app/build/;
+		    try_files $uri $uri/ /index.html;
+		}
+
+        location /code/ {
+            proxy_pass http://code-server:8080/;
+            proxy_set_header Host ${DOLLAR}host;
+            proxy_set_header X-Real-IP ${DOLLAR}remote_addr;
+            proxy_set_header X-Forwarded-For ${DOLLAR}proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto ${DOLLAR}scheme;
+            proxy_set_header Upgrade ${DOLLAR}http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_read_timeout 90;
+        }
+
+        location /dev/ {
+            proxy_pass http://code-server:3000/dev/;
+            proxy_set_header Host ${DOLLAR}host;
+            proxy_set_header X-Real-IP ${DOLLAR}remote_addr;
+            proxy_set_header X-Forwarded-For ${DOLLAR}proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto ${DOLLAR}scheme;
+
+            # CORS headers
+            add_header 'Access-Control-Allow-Origin' 'https://${DOMAIN}' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT' always;
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+            add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+
+            # Preflight requests
+            if (${DOLLAR}request_method = 'OPTIONS') {
+                add_header 'Access-Control-Allow-Origin' 'https://${DOMAIN}';
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT';
+                add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+                add_header 'Access-Control-Max-Age' 1728000;
+                add_header 'Content-Type' 'text/plain; charset=utf-8';
+                add_header 'Content-Length' 0;
+                return 204;
+            }
+        }
+
+        location /pb/ {
+            proxy_pass http://pocketbase:8090/;
+            proxy_set_header Host ${DOLLAR}host;
+            proxy_set_header X-Real-IP ${DOLLAR}remote_addr;
+            proxy_set_header X-Forwarded-For ${DOLLAR}proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto ${DOLLAR}scheme;
+            proxy_set_header Upgrade ${DOLLAR}http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_read_timeout 90;
+
+            # CORS headers
+            add_header 'Access-Control-Allow-Origin' 'https://${DOMAIN}' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT' always;
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+            add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+
+            # Preflight requests
+            if (${DOLLAR}request_method = 'OPTIONS') {
+                add_header 'Access-Control-Allow-Origin' 'https://${DOMAIN}';
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT';
+                add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+                add_header 'Access-Control-Max-Age' 1728000;
+                add_header 'Content-Type' 'text/plain; charset=utf-8';
+                add_header 'Content-Length' 0;
+                return 204;
+            }
+        }
+    }
+}
